@@ -8,8 +8,12 @@ import os
 import sys
 import requests
 
-from dspace_rest_client.client import DSpaceClient , logging
+from dotenv import load_dotenv
 
+load_dotenv()
+
+
+from dspace_rest_client.client import DSpaceClient , logging
 logging.disable(logging.WARNING)
 
 
@@ -36,10 +40,12 @@ def getFiles(id):
     response = client.api_get(url)
     data = response.json()
 
-    if "sections" not in data:
-        return []
+    print(data)
+    try:
+        files = data["sections"]["upload_publication"]["files"]
+    except KeyError:
+        return None
 
-    files = data["sections"]["upload_publication"]["files"]
     return files
 
 

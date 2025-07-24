@@ -1,4 +1,5 @@
-from os.path import isdir
+from dspace_rest_client.models import SimpleDSpaceObject , Bundle
+
 from ub_blient import *
 import os
 
@@ -38,12 +39,18 @@ def create_bitstream(publication_uuid, name, file_path, accesValue, licenseValue
         print(f"ERROR: Could not find publication , id: {publication_response}")
         return
 
+
+
     files = getFiles(publication_uuid)
+
+    if files is None:
+        print(f"ERROR: Could not read files, id: {publication_uuid}")
+        return
 
     file_names = [file['metadata']['dc.title'][0]["value"] for file in files]
 
     if (name in file_names):
-        print(F"INFO {name} already exists, skipping")
+        print(F"SKIPPING: {name} already exists")
         ## uncomment line below if you want to skip files that already exist
         return
 
@@ -57,7 +64,7 @@ def create_bitstream(publication_uuid, name, file_path, accesValue, licenseValue
     bundles = bundle_data.json()['_embedded']['bundles']
 
     if len(bundles) == 0:
-        print(f"ERROR: Could not find bundle, id: {bundle_link}")
+        print(f"ERROR: {publication_uuid} ,Could not find bundle with id: {bundle_link}")
         return
 
     original_bundle = bundles[0]
@@ -78,11 +85,12 @@ def create_bitstream(publication_uuid, name, file_path, accesValue, licenseValue
                                         metadata)
 
     if bitstream is None:
-        print(f"ERROR: Could not create bitstream, id: {bitstream}")
+        print(f"ERROR: {publication_uuid} Could not create bitstream, id: {bitstream}")
+        return
 
     r = setAcces(publication_uuid, file_index, accesValue)
     if (r.status_code == 200):
-        print(f"SUCCESS: {publication_uuid}, created File {name}, acces: {accesValue}")
+        print(f"SUCCESS: {publication_uuid}, created File {name}, access: {accesValue}")
 
 
 with open(FILE_PATH, "r", encoding="utf-8") as f:
