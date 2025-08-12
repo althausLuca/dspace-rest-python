@@ -1,9 +1,25 @@
-from dspace_rest_client.models import SimpleDSpaceObject , Bundle
+from dspace_rest_client.models import SimpleDSpaceObject, Bundle
 
 from ub_blient import *
 import os
 
+"""
+ Use code from: https://github.com/the-library-code/dspace-rest-python.git
+ 
+ 
+ 
+.txt file with | seperated values NO HEADER
+
+Format:
+  eprint-id (not used) |  group  | dspace-object-id | filename | licenceIdentifier | content
+  
+Example:
+  
+  10218 | validuser | df1ebfba-be7c-4a1e-8e9e-56e2a3324e67 | 10218.pdf | publisher| accepted
+"""
 FILE_PATH = "data.txt"
+
+## Relative path to the files
 FILE_DIR = "files"
 
 accessTypes = {"public": "openaccess", "validuser": "validuser"}
@@ -39,18 +55,14 @@ def create_bitstream(publication_uuid, name, file_path, accesValue, licenseValue
         print(f"ERROR: Could not find publication , id: {publication_response}")
         return
 
+    file_names = getFiles(publication_uuid)
 
-
-    files = getFiles(publication_uuid)
-
-    if files is None:
+    if file_names is None:
         print(f"ERROR: Could not read files, id: {publication_uuid}")
         return
 
-    file_names = [file['metadata']['dc.title'][0]["value"] for file in files]
-
     if (name in file_names):
-        print(F"SKIPPING: {name} already exists")
+        print(F"SKIPPING: {publication_uuid}, File {name} already exists")
         ## uncomment line below if you want to skip files that already exist
         return
 
@@ -91,6 +103,8 @@ def create_bitstream(publication_uuid, name, file_path, accesValue, licenseValue
     r = setAcces(publication_uuid, file_index, accesValue)
     if (r.status_code == 200):
         print(f"SUCCESS: {publication_uuid}, created File {name}, access: {accesValue}")
+    else:
+        print(f"ERROR: {publication_uuid} , set access value access value {accesValue} for file {name}")
 
 
 with open(FILE_PATH, "r", encoding="utf-8") as f:
@@ -105,17 +119,31 @@ with open(FILE_PATH, "r", encoding="utf-8") as f:
             "id": int(parts[0]),
             "group": parts[1],
             "uuid": parts[2],
-            "licenceIdentifier": parts[3],
-            "content": parts[4]
+            "name": parts[3],
+            "licenceIdentifier": parts[4],
+            "content": parts[5]
         }
-        file_dir = f"{FILE_DIR}/{parts[2]}"
 
-        if os.path.isdir(file_dir):
-            filenames = os.listdir(file_dir)
-            for name in filenames:
-                full_path = os.path.join(file_dir, name)
-                create_bitstream(row["uuid"], name, full_path,
-                                 accessTypes[row["group"]],
-                                 licenseTypes[row["licenceIdentifier"]],
-                                 contentTypes[row["content"]]
-                                 )
+        name = parts[3]
+        file_dir = f"{FILE_DIR}/{parts[2]}"
+        full_path = os.path.join(file_dir, name)
+
+        if not os.path.exists(full_path):
+            print(f"ERROR: {parts[2]} File not found at {full_path}")
+            continue
+
+        create_bitstream(row["uuid"], name, full_path,
+                         accessTypes[row["group"]],
+                         licenseTypes[row["licenceIdentifier"]],
+                         contentTypes[row["content"]]
+                         )
+
+        # if os.path.isdir(file_dir):
+        #     filenames = os.listdir(file_dir)
+        #     for name in filenames:
+        #         full_path = os.path.join(file_dir, name)
+        #         create_bitstream(row["uuid"], name, full_path,
+        #                          accessTypes[row["group"]],
+        #                          licenseTypes[row["licenceIdentifier"]],
+        #                          contentTypes[row["content"]]
+        #                          )
