@@ -38,8 +38,6 @@ for i in range(round(10000/size)):
     newIds = [ obj["_embedded"]["indexableObject"]["id"] for obj in objects]
     if(len(newIds) == 0):
         break
-    import random
-    print(random.randbytes(len("1fb6d553-a175-48f8-8195-43ff8251b2db")))
     pub_ids += newIds
 
 
