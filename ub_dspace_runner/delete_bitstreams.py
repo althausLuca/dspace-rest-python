@@ -16,10 +16,13 @@ def getDirtyBitstreamFromProjectId(project_id):
 
     bitstreams = []
     for b in bundles:
+        # print(b.name)
         bs = list(ub.client.get_bitstreams(bundle=b))
         for bitstream in bs:
             if bitstream.name == name_to_remove:
                 bitstreams.append(bitstream.id)
+            else:
+                print(bitstream.name)
 
     if(len(bitstreams) == 1):
         return [{"bs_id": bitstreams[0] , "project_id": project_id }]
@@ -29,13 +32,15 @@ def getDirtyBitstreamFromProjectId(project_id):
 
 logger.info(f"Loading Projects")
 ### Get All publication ids
-size = 10
+size = 20
 page = 0
 pub_ids = []
 for i in range(round(10000/size)):
     publications = ub.client.api_get(f"{ub.WEBSIDE}/server/api/discover/search/objects?configuration=project&size={size}&page={i}")
     objects = publications.json()["_embedded"]["searchResult"]["_embedded"]["objects"]
     newIds = [ obj["_embedded"]["indexableObject"]["id"] for obj in objects]
+
+    print(f"Found {len(newIds)} new IDs")
     if(len(newIds) == 0):
         break
     pub_ids += newIds
