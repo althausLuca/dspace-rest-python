@@ -1,3 +1,0 @@
-   188474 | public | aab989eb-a890-4ac8-b4f9-a3db0db5b390 | cc_by_nc_nd |
-   166412 | public | 18c5416b-31b1-40a0-b448-3b90a8e9682d | publisher | published
-   166985 | validuser    | ba49866a-4cd2-4a85-90ab-e73530f584b9 | cc_by_nc | supplemental
