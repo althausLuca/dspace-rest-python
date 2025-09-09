@@ -4,8 +4,13 @@ __pycache__/
 .python-version
 Pipfile.lock
 __pypackages__/
-.env
+*.env
 .venv
 env/
 venv/
 .idea/
+UB/.env
+*logs.txt
+
+UB/data/*
+UB/logs/*
